@@ -1,0 +1,9 @@
+#potdLink {
+     color: #fff;
+     padding: 10px 15px;
+     text-decoration: none;
+     font-size: 14px;
+   }
+   #potdLink:hover {
+     background-color: #3b5998;
+   }
