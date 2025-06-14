@@ -19,6 +19,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                dailyProblem: { contestId: dailyProblem.contestId, index: dailyProblem.index },
                lastFetchDate: today
              });
+             // Check if user solved the problem
+             if (data.userHandle) {
+               await checkSubmission(data.userHandle, dailyProblem.contestId, dailyProblem.index);
+             }
            } catch (error) {
              console.error('Error fetching daily problem:', error);
            }
@@ -38,4 +42,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
      const response = await fetch('https://codeforces.com/api/problemset.problems');
      const data = await response.json();
      return data.result.problems;
+   }
+
+   async function checkSubmission(handle, contestId, index) {
+     try {
+       const response = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=10`);
+       const data = await response.json();
+       const today = new Date().toISOString().split('T')[0];
+       const solved = data.result.some(sub => 
+         sub.contestId === contestId && 
+         sub.problem.index === index && 
+         sub.verdict === 'OK' && 
+         new Date(sub.creationTimeSeconds * 1000).toISOString().split('T')[0] === today
+       );
+       if (solved) {
+         chrome.storage.sync.get(['streak'], (data) => {
+           chrome.storage.sync.set({ streak: (data.streak || 0) + 1 });
+         });
+       } else {
+         chrome.storage.sync.set({ streak: 0 }); // Reset streak if not solved
+       }
+     } catch (error) {
+       console.error('Error checking submission:', error);
+     }
    }
