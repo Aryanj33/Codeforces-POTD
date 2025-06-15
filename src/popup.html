@@ -1,39 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Codeforces POTD</title>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-theme">
-  <div class="popup-container">
-    <h2>🔥 POTD Dashboard</h2>
-    <div class="section">
-      <label for="friendInput">👥 Add Friend Handle</label>
-      <input type="text" id="friendInput" placeholder="e.g. tourist">
-      <button id="addFriend">➕ Add Friend</button>
-      <div id="friendsList" class="friends-list">
-        <!-- Friends will be listed here -->
-      </div>
+    <nav>
+        <button id="home-btn">Home</button>
+        <button id="friends-btn">Friends</button>
+        <button id="leaderboard-btn">Leaderboard</button>
+    </nav>
+
+    <div id="home-section">
+        <div id="handle-input">
+            <input type="text" id="user-handle" placeholder="Enter your Codeforces handle">
+            <button id="save-handle">Save</button>
+        </div>
+        <div id="user-details" style="display: none;">
+            <p>Your Handle: <span id="display-handle"></span></p>
+            <p>Rating: <span id="display-rating"></span></p>
+            <button id="delete-handle">Delete Handle</button>
+        </div>
+        <div id="potd-section">
+            <p>🔥 Streak: <span id="streak">0</span> days</p>
+            <p>⭐ Points: <span id="points">0</span></p>
+            <button id="mark-solved">Mark Today's POTD as Solved</button>
+            <div id="badges">
+                <h4>🏅 Badges</h4>
+                <!-- Badges will be dynamically added here -->
+            </div>
+        </div>
+        <div id="upcoming-contests">
+            <h3>Upcoming Contests</h3>
+            <ul id="contests-list"></ul>
+        </div>
     </div>
-    <div class="section">
-      <label for="handleInput">👤 Your Codeforces Handle</label>
-      <input type="text" id="friendInput" placeholder="e.g. tourist">
-      <button id="saveHandle">💾 Save</button>
+
+    <div id="friends-section" style="display: none;">
+        <div>
+            <input type="text" id="friend-handle" placeholder="Enter friend's handle">
+            <button id="add-friend">Add Friend</button>
+        </div>
+        <div id="friends-list">
+            <h3>Friends</h3>
+            <ul id="friends-ul"></ul>
+        </div>
     </div>
-    <div class="section stats">
-      <p>🔥 Streak: <span id="streak">0</span> days</p>
-      <p>⭐ Points: <span id="points">0</span></p>
-      <button id="markSolved">✅ Mark Today's POTD as Solved</button>
+
+    <div id="leaderboard-section" style="display: none;">
+        <h3>Latest Contest Rating Changes</h3>
+        <div id="leaderboard-data"></div>
     </div>
-    <div class="section badges">
-      <h4>🏅 Badges</h4>
-      <div class="badge-container" id="badgeContainer">
-        <!-- badges will load here -->
-      </div>
-    </div>
-    <div class="footer">✨ Keep your streak alive daily!</div>
-  </div>
-  <script src="popup.js"></script>
+
+    <script src="popup.js"></script>
 </body>
 </html>
