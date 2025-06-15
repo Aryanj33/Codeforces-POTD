@@ -4,27 +4,17 @@ function injectPOTD() {
   console.log('📦 injectPOTD running');
 
   const header = document.querySelector('#header');
-  if (!header || document.getElementById('potdLink')) return;
+  if (!header || document.getElementById('potdLink') || !window.location.pathname.startsWith('/problemset')) return;
 
   console.log('✅ Header found, injecting link...');
 
   const potdTab = document.createElement('a');
-  potdTab.href = '#';
-  potdTab.textContent = '🔥 POTD';
   potdTab.id = 'potdLink';
-
-  potdTab.style.marginLeft = '10px';
-  potdTab.style.backgroundColor = 'yellow';
-  potdTab.style.color = 'black';
-  potdTab.style.fontWeight = 'bold';
-  potdTab.style.padding = '5px';
-  potdTab.style.border = '2px solid red';
-  potdTab.style.borderRadius = '4px';
-  potdTab.style.display = 'inline-block';
+  potdTab.textContent = '🔥 POTD';
 
   header.appendChild(potdTab);
 
-  chrome.storage.sync.get(['dailyProblem', 'userHandle'], (data) => {
+  chrome.storage.sync.get(['dailyProblem'], (data) => {
     console.log('📬 Got from storage:', data);
     if (data.dailyProblem) {
       const { contestId, index } = data.dailyProblem;
@@ -37,5 +27,6 @@ function injectPOTD() {
   chrome.runtime.sendMessage({ action: 'fetchDailyProblem' });
 }
 
-injectPOTD();
-
+// Run on page load and DOM changes
+document.addEventListener('DOMContentLoaded', injectPOTD);
+new MutationObserver(injectPOTD).observe(document.body, { childList: true, subtree: true });

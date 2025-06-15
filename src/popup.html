@@ -2,15 +2,29 @@
 <html>
 <head>
   <title>Codeforces POTD</title>
+  <meta charset="UTF-8">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div style="padding: 10px; width: 200px;">
-    <h3>Codeforces POTD</h3>
-    <label>Codeforces Handle:</label>
-    <input type="text" id="handleInput">
-    <button id="saveHandle">Save</button>
-    <p>Streak: <span id="streak">0</span> days</p>
+<body class="dark-theme">
+  <div class="popup-container">
+    <h2>🔥 POTD Dashboard</h2>
+    <div class="section">
+      <label for="handleInput">👤 Codeforces Handle</label>
+      <input type="text" id="handleInput" placeholder="e.g. tourist">
+      <button id="saveHandle">💾 Save</button>
+    </div>
+    <div class="section stats">
+      <p>🔥 Streak: <span id="streak">0</span> days</p>
+      <p>⭐ Points: <span id="points">0</span></p>
+      <button id="markSolved">✅ Mark Today's POTD as Solved</button>
+    </div>
+    <div class="section badges">
+      <h4>🏅 Badges</h4>
+      <div class="badge-container" id="badgeContainer">
+        <!-- badges will load here -->
+      </div>
+    </div>
+    <div class="footer">✨ Keep your streak alive daily!</div>
   </div>
   <script src="popup.js"></script>
 </body>

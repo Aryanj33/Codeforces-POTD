@@ -30,18 +30,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function fetchUserRating(handle) {
-  const response = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
-  const data = await response.json();
-  return data.result[0].rating || 1500;
+  try {
+    const response = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
+    if (!response.ok) throw new Error('Failed to fetch user rating');
+    const data = await response.json();
+    return data.result[0]?.rating || 1500;
+  } catch (error) {
+    console.error('Error fetching user rating:', error);
+    return 1500;
+  }
 }
 
 async function fetchProblems() {
-  const response = await fetch('https://codeforces.com/api/problemset.problems');
-  const data = await response.json();
-  return data.result.problems;
+  try {
+    const response = await fetch('https://codeforces.com/api/problemset.problems');
+    if (!response.ok) throw new Error('Failed to fetch problems');
+    const data = await response.json();
+    return data.result.problems || [];
+  } catch (error) {
+    console.error('Error fetching problems:', error);
+    return [];
+  }
 }
 
 function selectPersonalPOTD(problems, handle) {
+  if (problems.length === 0) return { contestId: '1', index: 'A', name: 'Default Problem' };
   const today = new Date().toISOString().split('T')[0];
   const seed = today + handle;
   let hash = 0;
@@ -49,5 +62,5 @@ function selectPersonalPOTD(problems, handle) {
     hash = (hash * 31 + seed.charCodeAt(i)) % 1e9;
   }
   const index = hash % problems.length;
-  return problems[index];
+  return problems[index] || problems[0];
 }
