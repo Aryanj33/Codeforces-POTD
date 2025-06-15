@@ -7,10 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.getElementById('addFriend').addEventListener('click', () => {
+    const friendHandle = document.getElementById('friendInput').value.trim();
+    if (friendHandle) {
+      chrome.storage.sync.get(['friends'], (data) => {
+        const friends = data.friends || [];
+        if (!friends.includes(friendHandle)) {
+          friends.push(friendHandle);
+          chrome.storage.sync.set({ friends }, loadFriends);
+        }
+        document.getElementById('friendInput').value = ''; // Clear input after adding
+      });
+    }
+  });
+
   document.getElementById('markSolved').addEventListener('click', markPOTDSolved);
 
-  // Initial load and check
   loadStats();
+  loadFriends();
   checkPOTDSolvedStatus();
 });
 
@@ -37,6 +51,71 @@ function loadStats() {
       badgeContainer.appendChild(badge);
     }
   });
+}
+
+async function loadFriends() {
+  const friendsList = document.getElementById('friendsList');
+  if (!friendsList) return;
+
+  const { friends } = await new Promise(resolve => {
+    chrome.storage.sync.get(['friends'], resolve);
+  });
+
+  friendsList.innerHTML = '<p>Loading friends...</p>';
+  if (friends && friends.length > 0) {
+    friendsList.innerHTML = '';
+    for (const handle of friends) {
+      const friendItem = document.createElement('div');
+      friendItem.className = 'friend-item';
+      friendItem.dataset.handle = handle;
+      friendItem.innerHTML = `<span>${handle}</span><span class="rating">Loading...</span>`;
+      friendsList.appendChild(friendItem);
+
+      try {
+        const rating = await fetchRatingWithRetry(handle);
+        const ratingSpan = friendItem.querySelector('.rating');
+        if (ratingSpan) {
+          ratingSpan.textContent = rating !== null ? rating : 'N/A';
+          if (rating === 'N/A') {
+            console.warn(`No rating found for ${handle}. Check if handle exists.`);
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to fetch rating for ${handle}:`, error);
+        const ratingSpan = friendItem.querySelector('.rating');
+        if (ratingSpan) ratingSpan.textContent = 'N/A';
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500)); // Respect rate limit
+    }
+  } else {
+    friendsList.innerHTML = '<p>No friends added yet.</p>';
+  }
+}
+
+async function fetchRatingWithRetry(handle, maxRetries = 3, delayMs = 1000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+      const response = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      if (data.status === 'FAILED') {
+        console.log(`API failed for ${handle}: ${data.comment}`);
+        throw new Error(data.comment);
+      }
+      return data.result[0]?.rating || null; // Return null if no rating
+    } catch (error) {
+      console.warn(`Attempt ${attempt} failed for ${handle}:`, error.message);
+      if (attempt === maxRetries) throw error;
+      await new Promise(resolve => setTimeout(resolve, delayMs * attempt)); // Exponential backoff
+    }
+  }
 }
 
 async function checkPOTDSolvedStatus() {
@@ -108,7 +187,7 @@ function markPOTDSolved() {
 }
 
 async function fetchSubmissions(handle) {
-  const response = await fetch(`https://codeforces.com/api/user.status?handle=${handle}`);
+  const response = await fetch(`https://codeforces.com/api/user.status?handle=${encodeURIComponent(handle)}`);
   const data = await response.json();
   if (data.status === 'OK') {
     return data.result;

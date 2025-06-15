@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Codeforces Problem of the Day",
   "version": "1.0",
-  "description": "Adds a daily problem tab to Codeforces, personalized by rating.",
+  "description": "Adds a daily problem tab to Codeforces, personalized by rating, with friend stalking.",
   "permissions": [
     "storage",
     "activeTab",

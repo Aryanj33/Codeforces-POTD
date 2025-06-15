@@ -7,7 +7,6 @@ body.dark-theme {
   padding: 15px;
 }
 
-
 .popup-container {
   display: flex;
   flex-direction: column;
@@ -95,4 +94,21 @@ button:hover {
   background-color: #ffeb3b;
   color: black;
   text-decoration: underline;
+}
+
+.friends-list {
+  margin-top: 10px;
+}
+
+.friend-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+}
+
+.friend-item .rating {
+  color: #4caf50;
 }
