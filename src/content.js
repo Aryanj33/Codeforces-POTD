@@ -1,23 +1,49 @@
-document.addEventListener('DOMContentLoaded', () => {
-         // Find the navigation bar
-         const nav = document.querySelector('.second-level-menu-list');
-         if (!nav) return;
+console.log('✅ content script loaded');
 
-         // Create POTD tab
-         const potdTab = document.createElement('li');
-         potdTab.innerHTML = '<a href="#" id="potdLink">Problem of the Day</a>';
-         nav.appendChild(potdTab);
+function injectPOTD() {
+  console.log('📦 injectPOTD running');
 
-         // Load daily problem from storage
-         chrome.storage.sync.get(['dailyProblem', 'userHandle'], (data) => {
-           if (data.dailyProblem) {
-             const { contestId, index } = data.dailyProblem;
-             potdTab.querySelector('#potdLink').href = `https://codeforces.com/problemset/problem/${contestId}/${index}`;
-           } else {
-             potdTab.querySelector('#potdLink').textContent = 'Loading POTD...';
-           }
-         });
+  const header = document.querySelector('#header');
+  if (!header) {
+    console.log('❌ Header not found');
+    return;
+  }
 
-         // Request background script to fetch new problem
-         chrome.runtime.sendMessage({ action: 'fetchDailyProblem' });
-       });
+  if (document.getElementById('potdLink')) {
+    console.log('⚠️ POTD already injected');
+    return;
+  }
+
+  console.log('✅ Header found, injecting link...');
+
+  const potdTab = document.createElement('a');
+  potdTab.href = '#';
+  potdTab.textContent = '🔥 POTD';
+  potdTab.id = 'potdLink';
+
+  potdTab.style.marginLeft = '10px';
+  potdTab.style.backgroundColor = 'yellow';
+  potdTab.style.color = 'black';
+  potdTab.style.fontWeight = 'bold';
+  potdTab.style.padding = '5px';
+  potdTab.style.border = '2px solid red';
+  potdTab.style.borderRadius = '4px';
+  potdTab.style.display = 'inline-block';
+
+  header.appendChild(potdTab);
+
+  chrome.storage.sync.get(['dailyProblem'], (data) => {
+    console.log('📬 Got from storage:', data);
+    if (data.dailyProblem) {
+      const { contestId, index } = data.dailyProblem;
+      potdTab.href = `https://codeforces.com/problemset/problem/${contestId}/${index}`;
+    } else {
+      potdTab.textContent = 'Loading POTD...';
+    }
+  });
+
+  chrome.runtime.sendMessage({ action: 'fetchDailyProblem' });
+}
+
+// Instead of waiting for DOMContentLoaded, call immediately
+injectPOTD();
