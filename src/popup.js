@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Set up tab switching
     document.getElementById('home-btn').addEventListener('click', () => showSection('home-section'));
-    document.getElementById('friends-btn').addEventListener('click', () => showSection('friends-section'));
-    document.getElementById('leaderboard-btn').addEventListener('click', () => showSection('leaderboard-section'));
+    document.getElementById('friends-btn').addEventListener('click', () => checkRestriction('friends-section'));
+    document.getElementById('leaderboard-btn').addEventListener('click', () => checkRestriction('leaderboard-section'));
 
     // Show home by default
+    document.getElementById('friends-section').classList.add('hidden');
+    document.getElementById('leaderboard-section').classList.add('hidden');
     showSection('home-section');
 
     // Load user handle and data if set
@@ -18,6 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('user-details').style.display = 'none';
             document.getElementById('handle-input').style.display = 'block';
         }
+    });
+
+    // Load POTD restriction state
+    chrome.storage.local.get('potdRestrictionEnabled', (result) => {
+        const restrictionEnabled = result.potdRestrictionEnabled || false;
+        document.getElementById('potd-restriction').checked = restrictionEnabled;
     });
 
     // Load upcoming contests
@@ -63,14 +71,68 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Event listener for POTD restriction checkbox
+    document.getElementById('potd-restriction').addEventListener('change', (event) => {
+        const isChecked = event.target.checked;
+        chrome.storage.local.set({ potdRestrictionEnabled: isChecked }, () => {
+            if (isChecked) checkRestriction(document.getElementById('home-section').classList.contains('hidden') ? 'home-section' : null);
+        });
+    });
+
+    // Event listener for marking POTD as solved
+    document.getElementById('mark-solved').addEventListener('click', () => {
+        const today = new Date().toDateString();
+        chrome.storage.local.set({ potdSolvedToday: true, potdSolvedDate: today }, () => {
+            checkRestriction(document.getElementById('home-section').classList.contains('hidden') ? 'home-section' : null);
+        });
+    });
 });
+
+// Function to check POTD restriction
+function checkRestriction(sectionId) {
+    chrome.storage.local.get(['potdRestrictionEnabled', 'potdSolvedToday', 'potdSolvedDate'], (result) => {
+        const restrictionEnabled = result.potdRestrictionEnabled || false;
+        const potdSolvedToday = result.potdSolvedToday || false;
+        const lastSolvedDate = result.potdSolvedDate || '';
+        const today = new Date().toDateString();
+
+        // Reset potdSolvedToday if the date has changed
+        if (lastSolvedDate !== today && potdSolvedToday) {
+            chrome.storage.local.set({ potdSolvedToday: false, potdSolvedDate: today });
+            return;
+        }
+
+        if (restrictionEnabled && !potdSolvedToday && sectionId) {
+            alert('Please solve today\'s POTD first.');
+            showSection('home-section');
+        } else if (sectionId) {
+            showSection(sectionId);
+        }
+    });
+}
 
 // Function to switch sections
 function showSection(sectionId) {
     const sections = ['home-section', 'friends-section', 'leaderboard-section'];
     sections.forEach(id => {
-        document.getElementById(id).style.display = id === sectionId ? 'block' : 'none';
+        const section = document.getElementById(id);
+        if (id === sectionId) {
+            section.classList.remove('hidden');
+            section.classList.add('fade-in');
+            setTimeout(() => section.classList.remove('fade-in'), 300);
+        } else {
+            section.classList.add('hidden');
+        }
     });
+    // Remove active class from all buttons
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+    // Add active class to the current button
+    let activeBtn;
+    if (sectionId === 'home-section') activeBtn = 'home-btn';
+    else if (sectionId === 'friends-section') activeBtn = 'friends-btn';
+    else if (sectionId === 'leaderboard-section') activeBtn = 'leaderboard-btn';
+    if (activeBtn) document.getElementById(activeBtn).classList.add('active');
     if (sectionId === 'friends-section') {
         loadFriends();
     } else if (sectionId === 'leaderboard-section') {
@@ -81,7 +143,7 @@ function showSection(sectionId) {
 // Function to load user data
 async function loadUserData(handle) {
     try {
-        const response = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
+        const response = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`);
         const data = await response.json();
         if (data.status === 'OK') {
             const user = data.result[0];
@@ -113,7 +175,12 @@ async function loadUpcomingContests() {
             if (upcoming.length > 0) {
                 upcoming.forEach(contest => {
                     const li = document.createElement('li');
-                    li.textContent = `${contest.name} - ${new Date(contest.startTimeSeconds * 1000).toLocaleString()}`;
+                    const a = document.createElement('a');
+                    a.href = `https://codeforces.com/contest/${contest.id}`;
+                    a.target = '_blank';
+                    a.textContent = `${contest.name} - ${new Date(contest.startTimeSeconds * 1000).toLocaleString()}`;
+                    a.className = 'contest-link';
+                    li.appendChild(a);
                     contestsList.appendChild(li);
                 });
             } else {
@@ -136,11 +203,11 @@ async function loadFriends() {
         friendsUl.innerHTML = '';
         friends.forEach(async (handle) => {
             try {
-                const response = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
+                const response = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`);
                 const data = await response.json();
                 if (data.status === 'OK' && data.result.length > 0) {
                     const user = data.result[0];
-                    const ratingResponse = await fetch(`https://codeforces.com/api/user.rating?handle=${handle}`);
+                    const ratingResponse = await fetch(`https://codeforces.com/api/user.rating?handle=${encodeURIComponent(handle)}`);
                     const ratingData = await ratingResponse.json();
                     if (ratingData.status === 'OK') {
                         const ratingHistory = ratingData.result;

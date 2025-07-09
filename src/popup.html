@@ -12,7 +12,7 @@
         <button id="leaderboard-btn">Leaderboard</button>
     </nav>
 
-    <div id="home-section">
+    <div id="home-section" class="section">
         <div id="handle-input">
             <input type="text" id="user-handle" placeholder="Enter your Codeforces handle">
             <button id="save-handle">Save</button>
@@ -21,6 +21,10 @@
             <p>Your Handle: <span id="display-handle"></span></p>
             <p>Rating: <span id="display-rating"></span></p>
             <button id="delete-handle">Delete Handle</button>
+        </div>
+        <div>
+            <input type="checkbox" id="potd-restriction">
+            <label for="potd-restriction">Enable POTD Restriction</label>
         </div>
         <div id="potd-section">
             <p>🔥 Streak: <span id="streak">0</span> days</p>
@@ -37,7 +41,7 @@
         </div>
     </div>
 
-    <div id="friends-section" style="display: none;">
+    <div id="friends-section" class="section hidden">
         <div>
             <input type="text" id="friend-handle" placeholder="Enter friend's handle">
             <button id="add-friend">Add Friend</button>
@@ -48,7 +52,7 @@
         </div>
     </div>
 
-    <div id="leaderboard-section" style="display: none;">
+    <div id="leaderboard-section" class="section hidden">
         <h3>Latest Contest Rating Changes</h3>
         <div id="leaderboard-data"></div>
     </div>

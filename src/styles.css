@@ -3,7 +3,7 @@ body.dark-theme {
     font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
     background-color: #121212;
     color: #eeeeee;
-    width: 350px; /* Increased from 250px */
+    width: 350px;
     padding: 15px;
 }
 
@@ -16,6 +16,13 @@ body.dark-theme {
 .section {
     border-bottom: 1px solid #333;
     padding-bottom: 10px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.section.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 input[type="text"] {
@@ -116,10 +123,44 @@ button:hover {
 nav {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 15px;
+    background-color: #333;
+    padding: 10px 0;
+    border-radius: 5px;
 }
 
 nav button {
     flex: 1;
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
     margin: 0 5px;
+}
+
+nav button:hover {
+    background-color: #555;
+}
+
+nav button.active {
+    background-color: #1f8dd6;
+}
+
+#upcoming-contests {
+    margin-top: 20px;
+}
+
+#contests-list li {
+    margin-bottom: 10px;
+}
+
+#contests-list a {
+    text-decoration: none;
+    color: #1f8dd6;
+    transition: color 0.3s;
+}
+
+#contests-list a:hover {
+    color: #106bb4;
 }
