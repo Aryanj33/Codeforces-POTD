@@ -1,15 +1,9 @@
 #potdLink {
-  padding: 5px 10px;
-  background-color: #1f8dd6;
-  color: white;
-  border-radius: 4px;
-  font-weight: bold;
   text-decoration: none;
-  margin-left: 10px;
-  font-size: 13px;
 }
 
 #potdLink:hover {
-  background-color: #106bb4;
-  text-decoration: none;
-}
+  background-color: #ffd700;
+  color: black;
+  text-decoration: underline;
+} 

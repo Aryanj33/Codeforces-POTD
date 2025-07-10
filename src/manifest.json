@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Codeforces Problem of the Day",
   "version": "1.0",
-  "description": "Adds a daily problem tab to Codeforces, similar to LeetCode POTD.",
+  "description": "Adds a daily problem tab to Codeforces, personalized by rating.",
   "permissions": [
     "storage",
     "activeTab",

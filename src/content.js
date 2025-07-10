@@ -4,15 +4,7 @@ function injectPOTD() {
   console.log('📦 injectPOTD running');
 
   const header = document.querySelector('#header');
-  if (!header) {
-    console.log('❌ Header not found');
-    return;
-  }
-
-  if (document.getElementById('potdLink')) {
-    console.log('⚠️ POTD already injected');
-    return;
-  }
+  if (!header || document.getElementById('potdLink')) return;
 
   console.log('✅ Header found, injecting link...');
 
@@ -32,7 +24,7 @@ function injectPOTD() {
 
   header.appendChild(potdTab);
 
-  chrome.storage.sync.get(['dailyProblem'], (data) => {
+  chrome.storage.sync.get(['dailyProblem', 'userHandle'], (data) => {
     console.log('📬 Got from storage:', data);
     if (data.dailyProblem) {
       const { contestId, index } = data.dailyProblem;
@@ -45,5 +37,5 @@ function injectPOTD() {
   chrome.runtime.sendMessage({ action: 'fetchDailyProblem' });
 }
 
-// Instead of waiting for DOMContentLoaded, call immediately
 injectPOTD();
+
