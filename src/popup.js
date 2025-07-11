@@ -147,51 +147,105 @@ async function loadUserData(handle) {
         const data = await response.json();
         if (data.status === 'OK') {
             const user = data.result[0];
+            // Avatar
+            const avatarUrl = user.titlePhoto && user.titlePhoto !== 'https://userpic.codeforces.org/no-avatar.jpg'
+                ? user.titlePhoto
+                : `https://codeforces.org/s/20807/images/avatars/${handle}.png`;
+            document.getElementById('user-avatar').src = avatarUrl;
+            // Handle, rank, rating, max rating
             document.getElementById('display-handle').textContent = user.handle;
+            document.getElementById('user-rank').textContent = user.rank ? user.rank : '';
             document.getElementById('display-rating').textContent = user.rating || 'N/A';
+            document.getElementById('user-max-rating').textContent = user.maxRating || 'N/A';
+            // Show user card
+            document.getElementById('user-card').style.display = 'block';
+            document.getElementById('handle-input').style.display = 'none';
+            // Last contest rating change
+            const ratingChangeSpan = document.getElementById('user-rating-change');
+            ratingChangeSpan.textContent = '';
+            ratingChangeSpan.className = '';
+            const ratingResp = await fetch(`https://codeforces.com/api/user.rating?handle=${encodeURIComponent(handle)}`);
+            const ratingData = await ratingResp.json();
+            if (ratingData.status === 'OK' && ratingData.result.length > 1) {
+                const last = ratingData.result[ratingData.result.length - 1];
+                const prev = ratingData.result[ratingData.result.length - 2];
+                const diff = last.newRating - prev.newRating;
+                if (diff > 0) {
+                    ratingChangeSpan.textContent = `▲ +${diff} (Last: ${last.contestName})`;
+                    ratingChangeSpan.className = 'up';
+                } else if (diff < 0) {
+                    ratingChangeSpan.textContent = `▼ ${diff} (Last: ${last.contestName})`;
+                    ratingChangeSpan.className = 'down';
+                } else {
+                    ratingChangeSpan.textContent = `No change (Last: ${last.contestName})`;
+                }
+            }
         } else {
-            alert('Handle not found');
-            chrome.storage.local.remove('userHandle', () => {
-                document.getElementById('user-details').style.display = 'none';
-                document.getElementById('handle-input').style.display = 'block';
-            });
+            document.getElementById('user-card').style.display = 'none';
+            document.getElementById('handle-input').style.display = 'block';
         }
     } catch (error) {
         console.error('Error fetching user data:', error);
-        alert('Error fetching user data');
+        document.getElementById('user-card').style.display = 'none';
+        document.getElementById('handle-input').style.display = 'block';
     }
 }
 
-// Function to load upcoming contests
+// Render badges in a modern way
+function renderBadges(badges = []) {
+    const badgesList = document.getElementById('badges-list');
+    badgesList.innerHTML = '';
+    if (!badges.length) {
+        badgesList.innerHTML = '<span style="color:#b0b0b0;">None</span>';
+        return;
+    }
+    badges.forEach(badge => {
+        const span = document.createElement('span');
+        span.className = 'badge earned';
+        span.textContent = badge;
+        badgesList.appendChild(span);
+    });
+}
+
+// Function to load upcoming contests as cards
 async function loadUpcomingContests() {
     try {
         const now = Math.floor(Date.now() / 1000);
         const response = await fetch('https://codeforces.com/api/contest.list');
         const data = await response.json();
+        const contestsList = document.getElementById('contests-list');
+        contestsList.innerHTML = '';
         if (data.status === 'OK') {
             const upcoming = data.result.filter(contest => contest.phase === 'BEFORE' && contest.startTimeSeconds > now);
-            const contestsList = document.getElementById('contests-list');
-            contestsList.innerHTML = '';
             if (upcoming.length > 0) {
                 upcoming.forEach(contest => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = `https://codeforces.com/contest/${contest.id}`;
-                    a.target = '_blank';
-                    a.textContent = `${contest.name} - ${new Date(contest.startTimeSeconds * 1000).toLocaleString()}`;
-                    a.className = 'contest-link';
-                    li.appendChild(a);
-                    contestsList.appendChild(li);
+                    const card = document.createElement('div');
+                    card.className = 'contest-card';
+                    const title = document.createElement('div');
+                    title.className = 'contest-title';
+                    title.textContent = contest.name;
+                    const date = document.createElement('div');
+                    date.className = 'contest-date';
+                    date.textContent = new Date(contest.startTimeSeconds * 1000).toLocaleString();
+                    const link = document.createElement('a');
+                    link.href = `https://codeforces.com/contest/${contest.id}`;
+                    link.target = '_blank';
+                    link.className = 'contest-link-btn';
+                    link.textContent = 'Go';
+                    card.appendChild(title);
+                    card.appendChild(date);
+                    card.appendChild(link);
+                    contestsList.appendChild(card);
                 });
             } else {
-                contestsList.innerHTML = '<p>No upcoming contests found.</p>';
+                contestsList.innerHTML = '<div style="color:#b0b0b0;text-align:center;">No upcoming contests found.</div>';
             }
         } else {
-            document.getElementById('contests-list').innerHTML = '<p>Error fetching contests.</p>';
+            contestsList.innerHTML = '<div style="color:#b0b0b0;text-align:center;">Error fetching contests.</div>';
         }
     } catch (error) {
         console.error('Error fetching contests:', error);
-        document.getElementById('contests-list').innerHTML = '<p>Error fetching contests.</p>';
+        document.getElementById('contests-list').innerHTML = '<div style="color:#b0b0b0;text-align:center;">Error fetching contests.</div>';
     }
 }
 
@@ -201,91 +255,26 @@ async function loadFriends() {
         const friends = result.friends || [];
         const friendsUl = document.getElementById('friends-ul');
         friendsUl.innerHTML = '';
-        friends.forEach(async (handle) => {
-            try {
-                const response = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`);
-                const data = await response.json();
-                if (data.status === 'OK' && data.result.length > 0) {
-                    const user = data.result[0];
-                    const ratingResponse = await fetch(`https://codeforces.com/api/user.rating?handle=${encodeURIComponent(handle)}`);
-                    const ratingData = await ratingResponse.json();
-                    if (ratingData.status === 'OK') {
-                        const ratingHistory = ratingData.result;
-                        let change = 0;
-                        if (ratingHistory.length > 1) {
-                            const lastRating = ratingHistory[ratingHistory.length - 1].newRating;
-                            const secondLastRating = ratingHistory[ratingHistory.length - 2].newRating;
-                            change = lastRating - secondLastRating;
-                        }
-                        const li = document.createElement('li');
-                        li.textContent = `${handle}: Rating ${user.rating || 'N/A'} (${change > 0 ? '+' : ''}${change})`;
-                        li.style.color = change > 0 ? 'green' : change < 0 ? 'red' : 'inherit';
-                        friendsUl.appendChild(li);
-                    }
-                } else {
-                    const li = document.createElement('li');
-                    li.textContent = `${handle}: Not found`;
-                    li.style.color = 'red';
-                    friendsUl.appendChild(li);
-                }
-            } catch (error) {
-                console.error('Error fetching friend data:', error);
-                const li = document.createElement('li');
-                li.textContent = `${handle}: Error fetching data`;
-                li.style.color = 'red';
-                friendsUl.appendChild(li);
-            }
+        friends.forEach((handle) => {
+            // Use Codeforces profile image URL
+            const avatarUrl = `https://codeforces.org/s/20807/images/avatars/${handle}.png`;
+            const li = document.createElement('li');
+            li.className = 'friend-item';
+            const img = document.createElement('img');
+            img.className = 'friend-avatar';
+            img.src = avatarUrl;
+            img.alt = handle;
+            img.onerror = function() { this.style.display = 'none'; };
+            const span = document.createElement('span');
+            span.textContent = handle;
+            li.appendChild(img);
+            li.appendChild(span);
+            friendsUl.appendChild(li);
         });
     });
 }
 
 // Function to load leaderboard
 async function loadLeaderboard() {
-    try {
-        const contestsResponse = await fetch('https://codeforces.com/api/contest.list');
-        const contestsData = await contestsResponse.json();
-        if (contestsData.status === 'OK') {
-            const now = Math.floor(Date.now() / 1000);
-            const recentContests = contestsData.result.filter(contest => contest.phase === 'FINISHED' && contest.startTimeSeconds < now);
-            if (recentContests.length > 0) {
-                const latestContest = recentContests.sort((a, b) => b.startTimeSeconds - a.startTimeSeconds)[0];
-                const ratingChangesResponse = await fetch(`https://codeforces.com/api/contest.ratingChanges?contestId=${latestContest.id}`);
-                const ratingChangesData = await ratingChangesResponse.json();
-                if (ratingChangesData.status === 'OK') {
-                    const changes = ratingChangesData.result;
-                    changes.sort((a, b) => (b.newRating - b.oldRating) - (a.newRating - a.oldRating));
-                    const topGainers = changes.slice(0, 10);
-                    const topLosers = changes.slice(-10).reverse();
-                    const leaderboardDiv = document.getElementById('leaderboard-data');
-                    leaderboardDiv.innerHTML = `<h4>Top Gainers in ${latestContest.name}</h4>`;
-                    const gainersList = document.createElement('ul');
-                    topGainers.forEach(change => {
-                        const li = document.createElement('li');
-                        const changeAmount = change.newRating - change.oldRating;
-                        li.textContent = `${change.handle}: +${changeAmount} (to ${change.newRating})`;
-                        li.style.color = 'green';
-                        gainersList.appendChild(li);
-                    });
-                    leaderboardDiv.appendChild(gainersList);
-                    leaderboardDiv.innerHTML += `<h4>Top Losers in ${latestContest.name}</h4>`;
-                    const losersList = document.createElement('ul');
-                    topLosers.forEach(change => {
-                        const li = document.createElement('li');
-                        const changeAmount = change.newRating - change.oldRating;
-                        li.textContent = `${change.handle}: ${changeAmount} (to ${change.newRating})`;
-                        li.style.color = 'red';
-                        losersList.appendChild(li);
-                    });
-                    leaderboardDiv.appendChild(losersList);
-                } else {
-                    document.getElementById('leaderboard-data').textContent = 'No rating changes available';
-                }
-            } else {
-                document.getElementById('leaderboard-data').textContent = 'No recent contests found';
-            }
-        }
-    } catch (error) {
-        console.error('Error loading leaderboard:', error);
-        document.getElementById('leaderboard-data').textContent = 'Error loading leaderboard';
-    }
+    // Do nothing, just show the placeholder
 }

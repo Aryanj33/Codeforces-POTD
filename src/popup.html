@@ -13,31 +13,57 @@
     </nav>
 
     <div id="home-section" class="section">
+        <div class="user-card" id="user-card" style="display: none;">
+            <div class="user-avatar-details">
+                <img id="user-avatar" class="user-avatar" src="" alt="User Avatar" />
+                <div class="user-info">
+                    <div class="user-handle-row">
+                        <span id="display-handle" class="user-handle"></span>
+                        <span id="user-rank" class="user-rank"></span>
+                    </div>
+                    <div class="user-rating-row">
+                        <span>Rating: <span id="display-rating"></span></span>
+                        <span>Max: <span id="user-max-rating"></span></span>
+                        <span id="user-rating-change"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="handle-input">
             <input type="text" id="user-handle" placeholder="Enter your Codeforces handle">
             <button id="save-handle">Save</button>
         </div>
-        <div id="user-details" style="display: none;">
-            <p>Your Handle: <span id="display-handle"></span></p>
-            <p>Rating: <span id="display-rating"></span></p>
-            <button id="delete-handle">Delete Handle</button>
-        </div>
-        <div>
-            <input type="checkbox" id="potd-restriction">
-            <label for="potd-restriction">Enable POTD Restriction</label>
-        </div>
-        <div id="potd-section">
-            <p>🔥 Streak: <span id="streak">0</span> days</p>
-            <p>⭐ Points: <span id="points">0</span></p>
-            <button id="mark-solved">Mark Today's POTD as Solved</button>
-            <div id="badges">
-                <h4>🏅 Badges</h4>
-                <!-- Badges will be dynamically added here -->
+        <div class="stats-card">
+            <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <span>Streak</span>
+                <span id="streak">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">⭐</span>
+                <span>Points</span>
+                <span id="points">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">🏅</span>
+                <span>Badges</span>
+                <span id="badges-list"></span>
             </div>
         </div>
+        <div class="toggle-row">
+            <label class="switch">
+                <input type="checkbox" id="potd-restriction">
+                <span class="slider round"></span>
+            </label>
+            <label for="potd-restriction" class="toggle-label">Enable POTD Restriction</label>
+        </div>
+        <div class="potd-section">
+            <button id="mark-solved" class="mark-solved-btn">Mark Today's POTD as Solved</button>
+        </div>
+        <div class="divider"></div>
         <div id="upcoming-contests">
             <h3>Upcoming Contests</h3>
-            <ul id="contests-list"></ul>
+            <div id="contests-list" class="contests-list-cards"></div>
         </div>
     </div>
 
@@ -48,13 +74,18 @@
         </div>
         <div id="friends-list">
             <h3>Friends</h3>
-            <ul id="friends-ul"></ul>
+            <ul id="friends-ul" class="friends-list-cards"></ul>
         </div>
     </div>
 
     <div id="leaderboard-section" class="section hidden">
-        <h3>Latest Contest Rating Changes</h3>
-        <div id="leaderboard-data"></div>
+        <h3>Leaderboard</h3>
+        <div id="leaderboard-data">
+          <div class="leaderboard-placeholder">
+            <span>🏆</span>
+            <p>Leaderboard coming soon!</p>
+          </div>
+        </div>
     </div>
 
     <script src="popup.js"></script>
