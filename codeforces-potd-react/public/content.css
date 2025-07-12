@@ -1,0 +1,15 @@
+/* Content script styles */
+#potdLink {
+  color: #ff6b6b !important;
+  text-decoration: none !important;
+  font-weight: bold !important;
+  margin-left: 15px !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  background: rgba(255, 107, 107, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+#potdLink:hover {
+  background: rgba(255, 107, 107, 0.2) !important;
+} 

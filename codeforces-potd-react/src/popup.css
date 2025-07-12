@@ -1,0 +1,429 @@
+/* General Reset and Body */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 350px;
+  min-height: 100vh;
+  background: #181a20;
+  color: #f1f1f1;
+  font-family: 'Segoe UI', 'Segoe UI Emoji', Arial, sans-serif;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Nav Bar */
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #23272f;
+  padding: 12px 0 8px 0;
+  border-radius: 0 0 12px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(31,141,214,0.08);
+}
+
+nav button {
+  flex: 1;
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  margin: 0 6px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+nav button.active,
+nav button:focus {
+  background: #1f8dd6;
+  color: #fff;
+}
+
+nav button:hover {
+  background: #44bcff;
+  color: #fff;
+}
+
+/* Section Layout */
+.section {
+  border-bottom: 1px solid #222;
+  padding: 0 0 18px 0;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* User Card */
+.user-card {
+  background: linear-gradient(90deg, #23272f 60%, #1f8dd6 100%);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(31,141,214,0.08);
+  padding: 18px 16px 14px 16px;
+  margin: 18px 0 18px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #fff;
+}
+
+.user-avatar-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #444;
+  object-fit: cover;
+  border: 2px solid #1f8dd6;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-handle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-handle {
+  color: #fff;
+}
+
+.user-rank {
+  background: #1f8dd6;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-rating-row {
+  display: flex;
+  gap: 16px;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+.up {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.down {
+  color: #ff5252;
+  font-weight: 600;
+}
+
+.delete-handle-btn {
+  margin-top: 8px;
+  background: #ff5252;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.delete-handle-btn:hover {
+  background: #ff7979;
+}
+
+/* Stats Card */
+.stats-card {
+  display: flex;
+  justify-content: space-between;
+  background: #23272f;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(31,141,214,0.07);
+  padding: 12px 0;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.stat-icon {
+  font-size: 1.3rem;
+  margin-bottom: 2px;
+}
+#badges-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 1.1rem;
+}
+.badge.earned {
+  background: #4caf50;
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 0.95em;
+  margin-right: 2px;
+}
+
+/* Toggle Switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+}
+.switch input { display: none; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #444;
+  border-radius: 22px;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: .4s;
+}
+input:checked + .slider {
+  background: #1f8dd6;
+}
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+.slider.round {
+  border-radius: 22px;
+}
+.toggle-label {
+  color: #b0b0b0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Mark Solved Button */
+.mark-solved-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #1f8dd6 60%, #44bcff 100%);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 0;
+  margin: 10px 0 0 0;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 4px rgba(31,141,214,0.10);
+  border: none;
+  transition: background 0.3s;
+}
+.mark-solved-btn:hover {
+  background: linear-gradient(90deg, #44bcff 60%, #1f8dd6 100%);
+}
+
+/* Divider */
+.divider {
+  border-top: 1.5px solid #222;
+  margin: 18px 0 10px 0;
+}
+
+/* Upcoming Contests */
+.contests-list-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.contest-card {
+  background: #262b34;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(31,141,214,0.10);
+  padding: 16px 18px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #fff;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  border: 1.5px solid #23272f;
+}
+.contest-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #1f8dd6;
+  margin-bottom: 2px;
+  word-break: break-word;
+}
+.contest-date {
+  font-size: 0.99rem;
+  color: #b0b0b0;
+  margin-bottom: 6px;
+}
+.contest-link-btn {
+  background: linear-gradient(90deg, #1f8dd6 60%, #44bcff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 4px;
+  box-shadow: 0 1px 4px rgba(31,141,214,0.10);
+  display: inline-block;
+}
+.contest-link-btn:hover {
+  background: linear-gradient(90deg, #44bcff 60%, #1f8dd6 100%);
+  color: #fff;
+}
+
+/* Friends List */
+.add-friend-card {
+  display: flex;
+  gap: 8px;
+  background: #23272f;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(31,141,214,0.07);
+}
+.add-friend-card input[type="text"] {
+  flex: 1;
+  margin: 0;
+  background: #181a20;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 1rem;
+}
+.add-friend-card button {
+  margin: 0;
+  padding: 7px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #1f8dd6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-friend-card button:hover {
+  background: #44bcff;
+}
+#friends-list h3 {
+  color: #1f8dd6;
+  margin-bottom: 8px;
+  margin-top: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: left;
+}
+.friends-list-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 90%;
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  min-height: 40px;
+}
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #23272f;
+  border-radius: 8px;
+  padding: 10px 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-size: 15px;
+  transition: box-shadow 0.2s;
+  min-width: 180px;
+  max-width: 240px;
+}
+.friend-item:hover {
+  box-shadow: 0 2px 8px rgba(31,141,214,0.15);
+}
+.friend-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #444;
+  object-fit: cover;
+}
+
+/* Leaderboard Placeholder */
+.leaderboard-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #23272f;
+  border-radius: 10px;
+  padding: 32px 0 24px 0;
+  margin: 24px 0 0 0;
+  color: #b0b0b0;
+  font-size: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.leaderboard-placeholder span {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+/* Empty State */
+.empty-message {
+  color: #b0b0b0;
+  text-align: center;
+  width: 100%;
+  font-size: 1.05rem;
+  margin: 18px 0 10px 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 400px) {
+  .user-card, .stats-card, .contest-card, .friend-item {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+} 

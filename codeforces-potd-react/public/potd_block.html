@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POTD Restriction</title>
+  <style>
+    body {
+      background: #23243a;
+      color: #fff;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .block-card {
+      background: #181a20;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 400px;
+    }
+    .block-card h1 {
+      font-size: 2rem;
+      margin-bottom: 18px;
+      color: #a78bfa;
+    }
+    .block-card p {
+      font-size: 1.1rem;
+      color: #e5e7eb;
+    }
+    .block-card a, .block-card button {
+      display: inline-block;
+      margin-top: 24px;
+      background: linear-gradient(90deg, #6366f1 0%, #a78bfa 100%);
+      color: #fff;
+      padding: 10px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .block-card a:hover, .block-card button:hover {
+      background: linear-gradient(90deg, #4f46e5 0%, #a78bfa 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="block-card">
+    <h1>POTD Restriction</h1>
+    <p>You must solve today’s Problem of the Day (POTD) on Codeforces to browse other sites.</p>
+    <button id="goto-potd">Go to POTD</button>
+  </div>
+  <script src="potd_block.js"></script>
+</body>
+</html> 
