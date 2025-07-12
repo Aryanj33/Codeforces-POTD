@@ -14,10 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const userHandle = result.userHandle;
         if (userHandle) {
             loadUserData(userHandle);
-            document.getElementById('user-details').style.display = 'block';
-            document.getElementById('handle-input').style.display = 'none';
         } else {
-            document.getElementById('user-details').style.display = 'none';
+            document.getElementById('user-card').style.display = 'none';
             document.getElementById('handle-input').style.display = 'block';
         }
     });
@@ -37,8 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (handle) {
             chrome.storage.local.set({ userHandle: handle }, () => {
                 loadUserData(handle);
-                document.getElementById('handle-input').style.display = 'none';
-                document.getElementById('user-details').style.display = 'block';
             });
         }
     });
@@ -46,10 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for deleting handle
     document.getElementById('delete-handle').addEventListener('click', () => {
         chrome.storage.local.remove('userHandle', () => {
-            document.getElementById('user-details').style.display = 'none';
+            document.getElementById('user-card').style.display = 'none';
             document.getElementById('handle-input').style.display = 'block';
             document.getElementById('display-handle').textContent = '';
             document.getElementById('display-rating').textContent = '';
+            document.getElementById('user-max-rating').textContent = '';
+            document.getElementById('user-rank').textContent = '';
+            document.getElementById('user-rating-change').textContent = '';
         });
     });
 
@@ -207,6 +206,72 @@ function renderBadges(badges = []) {
     });
 }
 
+// Function to load friends
+async function loadFriends() {
+    chrome.storage.local.get('friends', (result) => {
+        const friends = result.friends || [];
+        const friendsUl = document.getElementById('friends-ul');
+        friendsUl.innerHTML = '';
+        if (friends.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-message';
+            emptyMsg.textContent = 'No friends added yet.';
+            friendsUl.appendChild(emptyMsg);
+            return;
+        }
+        friends.forEach(async (handle) => {
+            // Fetch user info from Codeforces API
+            try {
+                const resp = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`);
+                const data = await resp.json();
+                let user = null;
+                if (data.status === 'OK' && data.result.length > 0) {
+                    user = data.result[0];
+                }
+                const avatarUrl = user && user.titlePhoto && user.titlePhoto !== 'https://userpic.codeforces.org/no-avatar.jpg'
+                    ? user.titlePhoto
+                    : `https://codeforces.org/s/20807/images/avatars/${handle}.png`;
+                const li = document.createElement('li');
+                li.className = 'friend-item';
+                const img = document.createElement('img');
+                img.className = 'friend-avatar';
+                img.src = avatarUrl;
+                img.alt = handle;
+                img.onerror = function() { this.style.display = 'none'; };
+                const infoDiv = document.createElement('div');
+                infoDiv.style.display = 'flex';
+                infoDiv.style.flexDirection = 'column';
+                infoDiv.style.gap = '2px';
+                const handleSpan = document.createElement('span');
+                handleSpan.textContent = user ? user.handle : handle;
+                handleSpan.style.fontWeight = 'bold';
+                const ratingSpan = document.createElement('span');
+                ratingSpan.textContent = user && user.rating ? `Rating: ${user.rating}` : 'Rating: N/A';
+                ratingSpan.style.fontSize = '0.95em';
+                const rankSpan = document.createElement('span');
+                rankSpan.textContent = user && user.rank ? `Rank: ${user.rank}` : '';
+                rankSpan.style.fontSize = '0.95em';
+                infoDiv.appendChild(handleSpan);
+                infoDiv.appendChild(ratingSpan);
+                if (rankSpan.textContent) infoDiv.appendChild(rankSpan);
+                li.appendChild(img);
+                li.appendChild(infoDiv);
+                friendsUl.appendChild(li);
+            } catch (e) {
+                const li = document.createElement('li');
+                li.className = 'friend-item';
+                li.textContent = `${handle} (Error fetching details)`;
+                friendsUl.appendChild(li);
+            }
+        });
+    });
+}
+
+// Function to load leaderboard
+async function loadLeaderboard() {
+    // Do nothing, just show the placeholder
+}
+
 // Function to load upcoming contests as cards
 async function loadUpcomingContests() {
     try {
@@ -238,43 +303,24 @@ async function loadUpcomingContests() {
                     contestsList.appendChild(card);
                 });
             } else {
-                contestsList.innerHTML = '<div style="color:#b0b0b0;text-align:center;">No upcoming contests found.</div>';
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-message';
+                emptyMsg.textContent = 'No upcoming contests found.';
+                contestsList.appendChild(emptyMsg);
             }
         } else {
-            contestsList.innerHTML = '<div style="color:#b0b0b0;text-align:center;">Error fetching contests.</div>';
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-message';
+            emptyMsg.textContent = 'Error fetching contests.';
+            contestsList.appendChild(emptyMsg);
         }
     } catch (error) {
         console.error('Error fetching contests:', error);
-        document.getElementById('contests-list').innerHTML = '<div style="color:#b0b0b0;text-align:center;">Error fetching contests.</div>';
+        const contestsList = document.getElementById('contests-list');
+        contestsList.innerHTML = '';
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'empty-message';
+        emptyMsg.textContent = 'Error fetching contests.';
+        contestsList.appendChild(emptyMsg);
     }
-}
-
-// Function to load friends
-async function loadFriends() {
-    chrome.storage.local.get('friends', (result) => {
-        const friends = result.friends || [];
-        const friendsUl = document.getElementById('friends-ul');
-        friendsUl.innerHTML = '';
-        friends.forEach((handle) => {
-            // Use Codeforces profile image URL
-            const avatarUrl = `https://codeforces.org/s/20807/images/avatars/${handle}.png`;
-            const li = document.createElement('li');
-            li.className = 'friend-item';
-            const img = document.createElement('img');
-            img.className = 'friend-avatar';
-            img.src = avatarUrl;
-            img.alt = handle;
-            img.onerror = function() { this.style.display = 'none'; };
-            const span = document.createElement('span');
-            span.textContent = handle;
-            li.appendChild(img);
-            li.appendChild(span);
-            friendsUl.appendChild(li);
-        });
-    });
-}
-
-// Function to load leaderboard
-async function loadLeaderboard() {
-    // Do nothing, just show the placeholder
 }
