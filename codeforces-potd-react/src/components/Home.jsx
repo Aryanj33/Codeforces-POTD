@@ -108,6 +108,7 @@ export default function Home() {
   const [potd, setPotd] = useState(null);
   const [potdSolvedToday, setPotdSolvedToday] = useState(false);
   const [checkingSolved, setCheckingSolved] = useState(false);
+  const [loadingPotd, setLoadingPotd] = useState(true);
 
   useEffect(() => {
     if (window.chrome?.storage?.local) {
@@ -162,13 +163,35 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Fetch POTD info (assume you have a function or API for this)
-    if (window.chrome?.storage?.sync) {
-      chrome.storage.sync.get(['dailyProblem', 'lastFetchDate'], (data) => {
-        const today = new Date().toISOString().split('T')[0];
-        if (data.lastFetchDate === today && data.dailyProblem) {
-          setPotd(data.dailyProblem);
+    // Fetch POTD info - first trigger the background script to fetch it
+    if (window.chrome?.runtime && window.chrome?.storage?.sync) {
+      setLoadingPotd(true);
+      // Send message to background script to fetch daily problem
+      chrome.runtime.sendMessage({ action: 'fetchDailyProblem' }, (response) => {
+        console.log('POTD fetch response:', response);
+        if (response && response.success && response.potd) {
+          setPotd(response.potd);
+        } else {
+          console.log('Fallback: trying to get from storage directly');
+          // Fallback: try to get from storage directly
+          chrome.storage.sync.get(['dailyProblem', 'lastFetchDate'], (data) => {
+            console.log('Storage data:', data);
+            const today = new Date().toISOString().split('T')[0];
+            if (data.lastFetchDate === today && data.dailyProblem) {
+              setPotd(data.dailyProblem);
+            }
+          });
         }
+        setLoadingPotd(false);
+      });
+    } else {
+      console.log('Chrome extension APIs not available - development mode');
+      // For development: set a mock POTD
+      setLoadingPotd(false);
+      setPotd({
+        contestId: '1',
+        index: 'A',
+        name: 'Mock Problem (Development)'
       });
     }
   }, []);
@@ -427,16 +450,21 @@ export default function Home() {
           onMouseLeave={() => setShowTooltip(false)}
           disabled
         >
-          {checkingSolved
+          {loadingPotd
+            ? 'Loading POTD...'
+            : checkingSolved
             ? 'Checking...'
             : potdSolvedToday
               ? 'POTD Solved!'
-              : 'Not solved yet'}
+              : potd
+              ? 'Not solved yet'
+              : 'No POTD available'}
         </button>
         <button
-          style={takeMeBtnStyle}
+          style={{...takeMeBtnStyle, opacity: loadingPotd || !potd ? 0.5 : 1}}
           onClick={openPotd}
-          title="Go to today's POTD on Codeforces"
+          disabled={loadingPotd || !potd}
+          title={potd ? "Go to today's POTD on Codeforces" : "POTD not available"}
         >
           Take me to POTD
         </button>
